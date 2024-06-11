@@ -31,7 +31,7 @@ for root, _, files in os.walk(unzip_path):
 				# DataFrame을 JSON 형식으로 변환
 				json_data = df.to_json(orient='records', force_ascii=False)
 				
-				# JSON 데이터에서 "["를 "[["로, "]"를 "]]"로 변환
+				# JSON 데이터에서 문장부호 변환
 				if '"[' in json_data or ']"' in json_data:
 					json_data = json_data.replace('"[', '[').replace(']"', ']')
 					json_data = json_data.replace('"{', '{').replace('}"', '}')
