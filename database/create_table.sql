@@ -137,7 +137,7 @@ FOREIGN KEY (`training_id`) REFERENCES `training` (`training_id`)
 CREATE TABLE `level_log` (
 `levellog_id` int NOT NULL AUTO_INCREMENT,
 `oauth_login_id` varchar(255) NOT NULL,
-`oauth_login_platform` varchar(32) NOT NULL,
+`oauth_login_platform` varchar(255) NOT NULL,
 `lc_training_name` varchar(10) NOT NULL COMMENT 'meta참조 - routine - training_name',
 `user_level` varchar(3) NOT NULL COMMENT 'meta참조 - routine - user_level',
 `created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,

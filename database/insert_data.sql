@@ -125,7 +125,7 @@ INSERT INTO routine (oauth_login_id, oauth_login_platform, routine_name, pool_le
 -- training
 -- training_id 기준
 -- 영법 : 자유형(FC, Front Crawl), 배영(BK, Backstroke), 평영(BR, Breaststroke), 접영(BF, Butterfly)
--- 수영수준 : 초급(B, BEginner), 중급(I, Intermediate), 상급(A, Advanced)
+-- 수영수준 : 초급(B, Beginner), 중급(I, Intermediate), 상급(A, Advanced)
 -- 훈련수준 : 쉬움(E, Easy), 보통(N, Normal), 어려움(D, Difficult)
 -- 숫자 : 영법, 수영수준, 훈련수준별 0001부터 시작하여 1씩 증가
 INSERT INTO training (training_id, training_name, user_level, training_level, distance, `sets`) VALUES
