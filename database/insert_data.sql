@@ -330,20 +330,21 @@ WHERE (oauth_login_id, oauth_login_platform, lc_training_name, created) IN (
 	GROUP BY oauth_login_id, oauth_login_platform, lc_training_name
 );
 
--- 두 번째 기록부터는 level 테이블의 기존 데이터를 업데이트
-UPDATE level l
-	JOIN (
-		SELECT levellog_id, oauth_login_id, oauth_login_platform, lc_training_name, created, updated
-		FROM level_log
-		WHERE (oauth_login_id, oauth_login_platform, lc_training_name, created) NOT IN (
-			SELECT oauth_login_id, oauth_login_platform, lc_training_name, MIN(created)
-			FROM level_log
-			GROUP BY oauth_login_id, oauth_login_platform, lc_training_name
-		)
-	) ll
-	ON l.oauth_login_id = ll.oauth_login_id
-			AND l.oauth_login_platform = ll.oauth_login_platform
-SET l.levellog_id = ll.levellog_id,
-		l.updated = ll.updated
-WHERE l.oauth_login_id = ll.oauth_login_id
-	AND l.oauth_login_platform = ll.oauth_login_platform;
+# 테이블 생성부터 적용해야하는데 sql문으로 적용하는 코드라 원활하지 못함
+# -- 두 번째 기록부터는 level 테이블의 기존 데이터를 업데이트
+# UPDATE level l
+# 	JOIN (
+# 		SELECT levellog_id, oauth_login_id, oauth_login_platform, lc_training_name, created, updated
+# 		FROM level_log
+# 		WHERE (oauth_login_id, oauth_login_platform, lc_training_name, created) NOT IN (
+# 			SELECT oauth_login_id, oauth_login_platform, lc_training_name, MIN(created)
+# 			FROM level_log
+# 			GROUP BY oauth_login_id, oauth_login_platform, lc_training_name
+# 		)
+# 	) ll
+# 	ON l.oauth_login_id = ll.oauth_login_id
+# 			AND l.oauth_login_platform = ll.oauth_login_platform
+# SET l.levellog_id = ll.levellog_id,
+# 		l.updated = ll.updated
+# WHERE l.oauth_login_id = ll.oauth_login_id
+# 	AND l.oauth_login_platform = ll.oauth_login_platform;
