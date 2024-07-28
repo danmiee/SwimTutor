@@ -130,7 +130,7 @@ INSERT INTO routine (oauth_login_id, oauth_login_platform, routine_name, pool_le
 -- 숫자 : 영법, 수영수준, 훈련수준별 0001부터 시작하여 1씩 증가
 
 -- training_for_routine
-INSERT INTO training_for_routine (routine_id, oauth_login_id, oauth_login_platform, session, training_id, created, updated) VALUES
+INSERT INTO training_for_routine (routine_no, oauth_login_id, oauth_login_platform, session, training_id, created, updated) VALUES
 -- user1@gmail.com - Morning Swim
 (1, 'user1@gmail.com', 'google', '워밍업', 'fcbe0001', '2024-05-31 07:12:12', '2024-05-31 07:12:12'),
 (1, 'user1@gmail.com', 'google', '코어', 'fcbn0001', '2024-05-31 07:12:12', '2024-05-31 07:12:12'),
