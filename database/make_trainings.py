@@ -1,8 +1,12 @@
 import mysql.connector
 import json
 # 데이터베이스 접속 정보 불러오기
+import os
+
 def load_secrets():
-    with open('security.json', 'r') as file:
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    file_path = os.path.join(script_dir, 'security.json')
+    with open(file_path, 'r') as file:
         return json.load(file)
 
 # 데이터베이스 연결
