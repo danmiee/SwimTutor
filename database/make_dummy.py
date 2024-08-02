@@ -59,9 +59,10 @@ def generate_sql_inserts_level_log():
         level_log = generate_level_log(_)
         insert_statement = f"""
           INSERT INTO level_log (
-            level_log_id, oauth_login_id, oauth_login_platform, lc_training_name, user_level, created, updated
+            oauth_login_id, oauth_login_platform, lc_training_name, user_level, created, updated
             ) VALUES (
-            '{level_log[0]}', '{level_log[1]}', '{level_log[2]}', '{level_log[3]}', '{level_log[4]}', '{level_log[5]}', '{level_log[6]}');
+            '{level_log[1]}', '{level_log[2]}', '{level_log[3]}', '{level_log[4]}', '{level_log[5]}', '{level_log[5]}'
+            );
           """
         insert_statements.append(insert_statement)
     # print(insert_statements)
@@ -71,36 +72,50 @@ def generate_sql_inserts_level_log():
 # Load JSON file
 def load_names():
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    file_path = os.path.join(script_dir, './json/routine_names.json')
+    file_path = os.path.join(script_dir, 'json/routine_names.json')
     with open(file_path, 'r') as file:
         return json.load(file)
 
 ### Routine 테이블에 삽입할 데이터 생성
 def generate_routine():
-    oauth_login_id = random.choice(ids)
-    oauth_login_platform = platform
-    routine_name = random.choice(load_names())
-    pool_length = random.choice([25, 50])
-    target_distance = random.randint(500, 5000)
-    target_distance -= (target_distance / 100)
-    sel_strokes = random.sample(strokes, random.randint(1, len(strokes)))
-    created = datetime.datetime.strptime(random.choice([
-        str(datetime.datetime.strptime('2024-05-18 00:00:00', '%Y-%m-%d %H:%M:%S') + datetime.timedelta(
-            seconds=random.randint(0, int((
-                datetime.datetime.strptime('2024-08-01 00:00:00', '%Y-%m-%d %H:%M:%S') 
-                - datetime.datetime.strptime('2024-05-18 00:00:00', '%Y-%m-%d %H:%M:%S')
-            ).total_seconds()))
-        ))
-    ]), '%Y-%m-%d %H:%M:%S')
-    return [oauth_login_id, oauth_login_platform, routine_name, pool_length, target_distance, sel_strokes, created]
+    statements = []
+    for user_id in ids:
+        oauth_login_id = user_id
+        for _ in range(random.randint(15, 25)):
+            routine_no = _ + 1
+            oauth_login_platform = platform
+            routine_names = load_names()['titles']
+            routine_name = str(random.choice(routine_names))
+            pool_length = random.choice([25, 50])
+            target_distance = random.randint(500, 5000)
+            target_distance = int(target_distance / 100) * 100
+            sel_strokes = random.sample(strokes, random.randint(1, len(strokes)))
+            created = datetime.datetime.strptime(random.choice([
+                str(datetime.datetime.strptime('2024-05-18 00:00:00', '%Y-%m-%d %H:%M:%S') + datetime.timedelta(
+                    seconds=random.randint(0, int((
+                        datetime.datetime.strptime('2024-08-01 00:00:00', '%Y-%m-%d %H:%M:%S') 
+                        - datetime.datetime.strptime('2024-05-18 00:00:00', '%Y-%m-%d %H:%M:%S')
+                    ).total_seconds()))
+                ))
+            ]), '%Y-%m-%d %H:%M:%S')
+            updated = created
+            statements.append([routine_no, oauth_login_id, oauth_login_platform, routine_name, pool_length, target_distance, sel_strokes, created, updated])
+    return statements
 
 ### SQL 삽입문 생성
 def generate_sql_inserts_routine():
-    insert_statements = []
-    for _ in range(1, 81):
-        routine = generate_routine()
-        insert_statement = f"INSERT INTO routine (oauth_login_id, oauth_login_platform, routine_name, pool_length, target_distance, sel_strokes, created) VALUES ('{routine[0]}', '{routine[1]}', '{routine[2]}', {routine[3]}, {routine[4]}, '{routine[5]}', '{routine[6]}');"
+    for routine in generate_routine():
+        insert_statements = []
+        # 디버깅을 위해 target_distance 출력
+        print(f"Debug - target_distance: {type(routine[5])}")
+        insert_statement = f"""
+            INSERT INTO routine (routine_no, oauth_login_id, oauth_login_platform, 
+            routine_name, pool_length, target_distance, sel_strokes, created, updated
+            ) VALUES (
+            {routine[0]}, '{routine[1]}', '{routine[2]}', '{routine[3]}', {routine[4]}, {routine[5]}, '{routine[6]}', {routine[7]}, {routine[8]});
+            """
         insert_statements.append(insert_statement)
+    print(insert_statements)
     return insert_statements
 
 ## training_for_routine
@@ -220,15 +235,17 @@ def main():
   # 데이터베이스 연결
   connection = connect_database(secrets)
 
-  # SQL 삽입문 생성
+  # level_log 테이블 데이터 삽입
   level_log_insert_statements = generate_sql_inserts_level_log()
-  # routine_insert_statements = generate_sql_inserts_routine()
-  # training_for_routine_insert_statements = generate_sql_inserts_training_for_routine()
-
-  # SQL 삽입문 실행
   execute_inserts(connection, level_log_insert_statements)
-  # execute_inserts(connection, routine_insert_statements)
-  # execute_inserts(connection, training_for_routine_insert_statements)
+
+  # routine 테이블 데이터 삽입
+#   routine_insert_statements = generate_sql_inserts_routine()
+#   execute_inserts(connection, routine_insert_statements)
+
+  # training_for_routine 테이블 데이터 삽입
+#   training_for_routine_insert_statements = generate_sql_inserts_training_for_routine()
+#   execute_inserts(connection, training_for_routine_insert_statements)
 
   # 데이터베이스 연결 종료
   close_connection(connection)
