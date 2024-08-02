@@ -29,39 +29,30 @@ end_date = datetime.datetime.strptime('2024-08-01 00:00:00', '%Y-%m-%d %H:%M:%S'
 delta_seconds = int((end_date - start_date).total_seconds())
 random_seconds = random.randint(0, delta_seconds)
 
-created = start_date + datetime.timedelta(seconds=random_seconds)
+create_time = start_date + datetime.timedelta(seconds=random_seconds)
 
 # 입력해야할 데이터
 
 ## level_log
 ### Level Log 테이블에 삽입할 데이터 생성
-def generate_level_log(id):
-    level_log_id = id
+def generate_level_log():
     oauth_login_id = random.choice(ids)
     oauth_login_platform = platform
     lc_training_name = random.choice(strokes)
     user_level = random.choice(levels)
-    created = datetime.datetime.strptime(random.choice([
-        str(datetime.datetime.strptime('2024-05-18 00:00:00', '%Y-%m-%d %H:%M:%S') + datetime.timedelta(
-            seconds=random.randint(0, int((
-                datetime.datetime.strptime('2024-08-01 00:00:00', '%Y-%m-%d %H:%M:%S') 
-                - datetime.datetime.strptime('2024-05-18 00:00:00', '%Y-%m-%d %H:%M:%S')
-            ).total_seconds()))
-        ))
-    ]), '%Y-%m-%d %H:%M:%S')
-    updated = created
-    return [level_log_id, oauth_login_id, oauth_login_platform, lc_training_name, user_level, created, updated]
+    created = create_time
+    return [oauth_login_id, oauth_login_platform, lc_training_name, user_level, created]
 
 ### SQL 삽입문 생성
 def generate_sql_inserts_level_log():
     insert_statements = []
     for _ in range(15):
-        level_log = generate_level_log(_)
+        level_log = generate_level_log()
         insert_statement = f"""
           INSERT INTO level_log (
             oauth_login_id, oauth_login_platform, lc_training_name, user_level, created, updated
             ) VALUES (
-            '{level_log[1]}', '{level_log[2]}', '{level_log[3]}', '{level_log[4]}', '{level_log[5]}', '{level_log[5]}'
+            '{level_log[0]}', '{level_log[1]}', '{level_log[2]}', '{level_log[3]}', '{level_log[4]}', '{level_log[4]}'
             );
           """
         insert_statements.append(insert_statement)
