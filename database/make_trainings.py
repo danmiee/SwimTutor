@@ -5,7 +5,8 @@ import os
 
 def load_secrets():
     script_dir = os.path.dirname(os.path.abspath(__file__))
-    file_path = os.path.join(script_dir, 'security.json')
+    file_path = os.path.join(script_dir, 'test-security.json')
+    # file_path = os.path.join(script_dir, 'security.json')
     with open(file_path, 'r') as file:
         return json.load(file)
 
@@ -23,6 +24,7 @@ def connect_database(secrets):
         print(f"Error connecting to MySQL: {e}")
     return connection
 
+# 입력된 SQL 문장을 실행
 def execute_inserts(connection, insert_statements):
     if connection is not None:
         cursor = connection.cursor()
@@ -36,11 +38,13 @@ def execute_inserts(connection, insert_statements):
             print(f"Error executing insert statements: {e}")
         finally:
             cursor.close()
+
 # 데이터베이스 연결 종료
 def close_connection(connection):
     if connection is not None:
         connection.close()
         print("Database connection closed.")
+        
 # 사용자 레벨, 거리, 세트 수에 따라 트레이닝 레벨 결정
 def determine_training_level(user_level, distance, sets, max_distance, max_sets):
     if distance == max_distance and sets == 1:
