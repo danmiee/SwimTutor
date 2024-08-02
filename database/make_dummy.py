@@ -68,12 +68,15 @@ def load_names():
         return json.load(file)
 
 ### Routine 테이블에 삽입할 데이터 생성
-def generate_routine():
+def generate_routine(connection):
+    if connection is not None:
+        cursor = connection.cursor()
     statements = []
     for user_id in ids:
-        oauth_login_id = user_id
+        cursor.execute(f"SELECT MAX(routine_no) AS max_routine_no FROM routine WHERE oauth_login_id = '{user_id}'")
+        result = cursor.fetchone()
         for _ in range(random.randint(15, 25)):
-            routine_no = _ + 1
+            routine_no = result[0] + 1 if result[0] is not None else _ + 1
             oauth_login_platform = platform
             routine_names = load_names()['titles']
             routine_name = str(random.choice(routine_names))
@@ -81,6 +84,7 @@ def generate_routine():
             target_distance = random.randint(500, 5000)
             target_distance = int(target_distance / 100) * 100
             sel_strokes = random.sample(strokes, random.randint(1, len(strokes)))
+            sel_strokes = ', '.join(sel_strokes)
             created = datetime.datetime.strptime(random.choice([
                 str(datetime.datetime.strptime('2024-05-18 00:00:00', '%Y-%m-%d %H:%M:%S') + datetime.timedelta(
                     seconds=random.randint(0, int((
@@ -89,24 +93,23 @@ def generate_routine():
                     ).total_seconds()))
                 ))
             ]), '%Y-%m-%d %H:%M:%S')
-            updated = created
-            statements.append([routine_no, oauth_login_id, oauth_login_platform, routine_name, pool_length, target_distance, sel_strokes, created, updated])
+            statements.append([routine_no, user_id, oauth_login_platform, routine_name, pool_length, target_distance, sel_strokes, created])
     return statements
 
 ### SQL 삽입문 생성
-def generate_sql_inserts_routine():
-    for routine in generate_routine():
-        insert_statements = []
+def generate_sql_inserts_routine(connection):
+    insert_statements = []
+    for routine in generate_routine(connection):
         # 디버깅을 위해 target_distance 출력
-        print(f"Debug - target_distance: {type(routine[5])}")
+        # print(f"Debug - target_distance: {type(routine[5])}")
         insert_statement = f"""
             INSERT INTO routine (routine_no, oauth_login_id, oauth_login_platform, 
             routine_name, pool_length, target_distance, sel_strokes, created, updated
             ) VALUES (
-            {routine[0]}, '{routine[1]}', '{routine[2]}', '{routine[3]}', {routine[4]}, {routine[5]}, '{routine[6]}', {routine[7]}, {routine[8]});
+            {routine[0]}, '{routine[1]}', '{routine[2]}', '{routine[3]}', {routine[4]}, {routine[5]}, '{routine[6]}', '{routine[7]}', '{routine[7]}');
             """
         insert_statements.append(insert_statement)
-    print(insert_statements)
+    # print(insert_statements)
     return insert_statements
 
 ## training_for_routine
@@ -122,7 +125,7 @@ def generate_training_for_routine(cursor):
     # Fetching sel_strokes from routine table for the same routine_no
     cursor.execute(f"SELECT sel_strokes FROM routine WHERE routine_no = {routine_no}")
     result = cursor.fetchone()
-    print(result)
+    # print(result)
     
     # sel_strokes = cursor.fetchone()[0].get('sel_strokes')
     # user_level = user_levels.get(cursor.fetchone()[0].get('user_level'))
@@ -201,7 +204,7 @@ def execute_inserts(connection, insert_statements):
         print(cursor)
         try:
             for statement in insert_statements:
-                print(statement)
+                # print(statement)
                 cursor.execute(statement)
             connection.commit()
             print(f"Successfully executed {len(insert_statements)} insert statements.")
@@ -227,12 +230,12 @@ def main():
   connection = connect_database(secrets)
 
   # level_log 테이블 데이터 삽입
-  level_log_insert_statements = generate_sql_inserts_level_log()
-  execute_inserts(connection, level_log_insert_statements)
+#   level_log_insert_statements = generate_sql_inserts_level_log()
+#   execute_inserts(connection, level_log_insert_statements)
 
   # routine 테이블 데이터 삽입
-#   routine_insert_statements = generate_sql_inserts_routine()
-#   execute_inserts(connection, routine_insert_statements)
+  routine_insert_statements = generate_sql_inserts_routine(connection)
+  execute_inserts(connection, routine_insert_statements)
 
   # training_for_routine 테이블 데이터 삽입
 #   training_for_routine_insert_statements = generate_sql_inserts_training_for_routine()
